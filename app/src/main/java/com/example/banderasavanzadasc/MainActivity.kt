@@ -75,15 +75,15 @@ fun BanderaSeychellesCL(modifier: Modifier = Modifier) {
             val angulos = listOf(90f, 72f, 54f, 36f, 18f, 0f)
 
             for (i in 0 until 5) {
-                val p1 = puntoEnBorde(w, h, angulos[i])
-                val p2 = puntoEnBorde(w, h, angulos[i + 1])
+                val a = puntoEnBorde(w, h, angulos[i])
+                val b = puntoEnBorde(w, h, angulos[i + 1])
                 val franja = Path().apply {
                     moveTo(origen.x, origen.y)
-                    lineTo(p1.x, p1.y)
-                    if (p1.y < 1f && p2.x > w - 1f) {
+                    lineTo(a.x, a.y)
+                    if (a.y < 1f && b.x > w - 1f) {
                         lineTo(w, 0f)
                     }
-                    lineTo(p2.x, p2.y)
+                    lineTo(b.x, b.y)
                     close()
                 }
                 drawPath(franja, color = colores[i])
