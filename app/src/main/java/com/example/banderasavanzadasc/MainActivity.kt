@@ -27,10 +27,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Box(contentAlignment = Alignment.Center) {
-                    BanderaSeychellesCL(
+                    BanderaPapuaNuevaGuineaCL(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(2f)
+                            .aspectRatio(4f / 3f)
                     )
                 }
             }
@@ -38,18 +38,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun puntoEnBorde(w: Float, h: Float, grados: Float): Offset {
-    val a = Math.toRadians(grados.toDouble())
-    val dx = cos(a).toFloat()
-    val dy = sin(a).toFloat()
-    val haciaDerecha = if (dx > 0.0001f) w / dx else Float.MAX_VALUE
-    val haciaArriba = if (dy > 0.0001f) h / dy else Float.MAX_VALUE
-    val t = minOf(haciaDerecha, haciaArriba)
-    return Offset(dx * t, h - dy * t)
+private fun crearEstrella(cx: Float, cy: Float, radio: Float): Path {
+    val path = Path()
+    val radioInterior = radio * 0.4f
+    for (i in 0 until 10) {
+        val r = if (i % 2 == 0) radio else radioInterior
+        val angulo = Math.toRadians((-90 + i * 36).toDouble())
+        val x = cx + r * cos(angulo).toFloat()
+        val y = cy + r * sin(angulo).toFloat()
+        if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    return path
 }
 
 @Composable
-fun BanderaSeychellesCL(modifier: Modifier = Modifier) {
+fun BanderaPapuaNuevaGuineaCL(modifier: Modifier = Modifier) {
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
         val lienzo = createRef()
         Canvas(
@@ -64,40 +68,64 @@ fun BanderaSeychellesCL(modifier: Modifier = Modifier) {
         ) {
             val w = size.width
             val h = size.height
+            val rojo = Color(0xFFCE1126)
+            val dorado = Color(0xFFFCD116)
 
-            val azul = Color(0xFF003F87)
-            val amarillo = Color(0xFFFCD856)
-            val rojo = Color(0xFFD62828)
-            val verde = Color(0xFF007A3D)
+            drawRect(color = rojo)
 
-            val origen = Offset(0f, h)
-            val colores = listOf(azul, amarillo, rojo, Color.White, verde)
-            val angulos = listOf(90f, 72f, 54f, 36f, 18f, 0f)
-
-            for (i in 0 until 5) {
-                val a = puntoEnBorde(w, h, angulos[i])
-                val b = puntoEnBorde(w, h, angulos[i + 1])
-                val franja = Path().apply {
-                    moveTo(origen.x, origen.y)
-                    lineTo(a.x, a.y)
-                    if (a.y < 1f && b.x > w - 1f) {
-                        lineTo(w, 0f)
-                    }
-                    lineTo(b.x, b.y)
-                    close()
-                }
-                drawPath(franja, color = colores[i])
+            val negro = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(w, h)
+                lineTo(0f, h)
+                close()
             }
+            drawPath(negro, color = Color.Black)
+
+            val cx = w * 0.27f
+            val cy = h * 0.70f
+            val grande = h * 0.05f
+
+            drawPath(crearEstrella(cx, cy - h * 0.22f, grande), color = Color.White)
+            drawPath(crearEstrella(cx, cy + h * 0.22f, grande), color = Color.White)
+            drawPath(crearEstrella(cx - h * 0.17f, cy, grande), color = Color.White)
+            drawPath(crearEstrella(cx + h * 0.15f, cy - h * 0.04f, grande), color = Color.White)
+            drawPath(crearEstrella(cx + h * 0.08f, cy + h * 0.07f, h * 0.03f), color = Color.White)
+
+            val centroAve = Offset(w * 0.68f, h * 0.28f)
+            val escala = h * 0.20f
+            val puntos = listOf(
+                0.9f to -0.7f,
+                0.5f to -0.8f,
+                0.3f to -0.4f,
+                0.8f to -0.1f,
+                0.2f to 0.0f,
+                0.5f to 0.7f,
+                0.0f to 0.3f,
+                -0.4f to 1.0f,
+                -0.3f to 0.2f,
+                -0.9f to 0.6f,
+                -0.5f to -0.1f,
+                -0.1f to -0.5f
+            )
+
+            val ave = Path()
+            puntos.forEachIndexed { i, (dx, dy) ->
+                val x = centroAve.x + dx * escala
+                val y = centroAve.y + dy * escala
+                if (i == 0) ave.moveTo(x, y) else ave.lineTo(x, y)
+            }
+            ave.close()
+            drawPath(ave, color = dorado)
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun BanderaSeychellesCLPreview() {
+fun BanderaPapuaNuevaGuineaCLPreview() {
     Surface {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            BanderaSeychellesCL(Modifier.fillMaxWidth().aspectRatio(2f))
+            BanderaPapuaNuevaGuineaCL(Modifier.fillMaxWidth().aspectRatio(4f / 3f))
         }
     }
 }
