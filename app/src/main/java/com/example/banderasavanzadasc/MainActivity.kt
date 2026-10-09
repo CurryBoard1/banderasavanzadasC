@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -28,10 +27,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Box(contentAlignment = Alignment.Center) {
-                    BanderaIsraelCL(
+                    BanderaCubaCL(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(11f / 8f)
+                            .aspectRatio(2f)
                     )
                 }
             }
@@ -39,10 +38,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private fun trianguloPath(cx: Float, cy: Float, r: Float, rotacion: Float): Path {
+private fun crearEstrella(cx: Float, cy: Float, radio: Float): Path {
     val path = Path()
-    for (i in 0..2) {
-        val angulo = Math.toRadians((rotacion + i * 120).toDouble())
+    val radioInterior = radio * 0.4f
+    for (i in 0 until 10) {
+        val r = if (i % 2 == 0) radio else radioInterior
+        val angulo = Math.toRadians((-90 + i * 36).toDouble())
         val x = cx + r * cos(angulo).toFloat()
         val y = cy + r * sin(angulo).toFloat()
         if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
@@ -52,21 +53,21 @@ private fun trianguloPath(cx: Float, cy: Float, r: Float, rotacion: Float): Path
 }
 
 @Composable
-fun BanderaIsraelCL(modifier: Modifier = Modifier) {
+fun BanderaCubaCL(modifier: Modifier = Modifier) {
     ConstraintLayout(modifier = modifier.fillMaxSize().background(Color.White)) {
-        val (franjaArriba, franjaAbajo, estrella) = createRefs()
-        val azul = Color(0xFF0038B8)
+        val (franja1, franja2, franja3, triangulo) = createRefs()
+        val azul = Color(0xFF002E6E)
 
-        val arribaInicio = createGuidelineFromTop(0.09f)
-        val arribaFin = createGuidelineFromTop(0.25f)
-        val abajoInicio = createGuidelineFromTop(0.75f)
-        val abajoFin = createGuidelineFromTop(0.91f)
+        val g1 = createGuidelineFromTop(0.2f)
+        val g2 = createGuidelineFromTop(0.4f)
+        val g3 = createGuidelineFromTop(0.6f)
+        val g4 = createGuidelineFromTop(0.8f)
 
         Box(
             modifier = Modifier
-                .constrainAs(franjaArriba) {
-                    top.linkTo(arribaInicio)
-                    bottom.linkTo(arribaFin)
+                .constrainAs(franja1) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(g1)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
@@ -74,12 +75,23 @@ fun BanderaIsraelCL(modifier: Modifier = Modifier) {
                 }
                 .background(azul)
         )
-
         Box(
             modifier = Modifier
-                .constrainAs(franjaAbajo) {
-                    top.linkTo(abajoInicio)
-                    bottom.linkTo(abajoFin)
+                .constrainAs(franja2) {
+                    top.linkTo(g2)
+                    bottom.linkTo(g3)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }
+                .background(azul)
+        )
+        Box(
+            modifier = Modifier
+                .constrainAs(franja3) {
+                    top.linkTo(g4)
+                    bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                     width = Dimension.fillToConstraints
@@ -89,7 +101,7 @@ fun BanderaIsraelCL(modifier: Modifier = Modifier) {
         )
 
         Canvas(
-            modifier = Modifier.constrainAs(estrella) {
+            modifier = Modifier.constrainAs(triangulo) {
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)
                 start.linkTo(parent.start)
@@ -98,23 +110,35 @@ fun BanderaIsraelCL(modifier: Modifier = Modifier) {
                 height = Dimension.fillToConstraints
             }
         ) {
-            val cx = size.width / 2f
-            val cy = size.height / 2f
-            val r = size.height * 0.21f
-            val trazo = Stroke(width = size.height * 0.035f)
+            val h = size.height
+            val anchoTriangulo = h * 0.866f
 
-            drawPath(trianguloPath(cx, cy, r, -90f), color = azul, style = trazo)
-            drawPath(trianguloPath(cx, cy, r, 90f), color = azul, style = trazo)
+            val formaTriangulo = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(anchoTriangulo, h / 2f)
+                lineTo(0f, h)
+                close()
+            }
+            drawPath(formaTriangulo, color = Color(0xFFCB1428))
+
+            drawPath(
+                path = crearEstrella(
+                    cx = anchoTriangulo / 3f,
+                    cy = h / 2f,
+                    radio = h * 0.13f
+                ),
+                color = Color.White
+            )
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun BanderaIsraelCLPreview() {
+fun BanderaCubaCLPreview() {
     Surface {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            BanderaIsraelCL(Modifier.fillMaxWidth().aspectRatio(11f / 8f))
+            BanderaCubaCL(Modifier.fillMaxWidth().aspectRatio(2f))
         }
     }
 }
