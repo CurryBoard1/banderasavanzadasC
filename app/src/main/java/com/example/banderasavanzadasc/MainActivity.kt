@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,7 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -28,7 +27,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Surface(modifier = Modifier.fillMaxSize()) {
                 Box(contentAlignment = Alignment.Center) {
-                    BanderaSudafricaCL(
+                    BanderaButanCL(
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(3f / 2f)
@@ -40,38 +39,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BanderaSudafricaCL(modifier: Modifier = Modifier) {
+fun BanderaButanCL(modifier: Modifier = Modifier) {
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
         val lienzo = createRef()
-        val (cielo, mar) = createRefs()
-        val horizonte = createGuidelineFromTop(0.5f)
-
-        Box(
-            modifier = Modifier
-                .constrainAs(cielo) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(horizonte)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
-                }
-                .background(Color(0xFFDE3831))
-        )
-
-        Box(
-            modifier = Modifier
-                .constrainAs(mar) {
-                    top.linkTo(horizonte)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                    height = Dimension.fillToConstraints
-                }
-                .background(Color(0xFF002395))
-        )
-
         Canvas(
             modifier = Modifier.constrainAs(lienzo) {
                 top.linkTo(parent.top)
@@ -84,53 +54,84 @@ fun BanderaSudafricaCL(modifier: Modifier = Modifier) {
         ) {
             val w = size.width
             val h = size.height
-            val cy = h / 2f
+            val amarillo = Color(0xFFFFD520)
+            val naranja = Color(0xFFFF4E12)
 
-            val verde = Color(0xFF007A4D)
-            val dorado = Color(0xFFFFB612)
-
-            val arriba = Offset(0f, 0f)
-            val abajo = Offset(0f, h)
-            val union = Offset(h * 0.54f, cy)
-            val derecha = Offset(w, cy)
-
-            clipRect {
-                val grosorBlanco = h * 0.30f
-                drawLine(Color.White, arriba, union, grosorBlanco, cap = StrokeCap.Round)
-                drawLine(Color.White, abajo, union, grosorBlanco, cap = StrokeCap.Round)
-                drawLine(Color.White, union, derecha, grosorBlanco, cap = StrokeCap.Round)
-
-                val grosorVerde = h * 0.20f
-                drawLine(verde, arriba, union, grosorVerde, cap = StrokeCap.Round)
-                drawLine(verde, abajo, union, grosorVerde, cap = StrokeCap.Round)
-                drawLine(verde, union, derecha, grosorVerde, cap = StrokeCap.Round)
-
-                val trianguloDorado = Path().apply {
-                    moveTo(0f, h * 0.136f)
-                    lineTo(h * 0.393f, cy)
-                    lineTo(0f, h * 0.864f)
-                    close()
-                }
-                drawPath(trianguloDorado, color = dorado)
-
-                val trianguloNegro = Path().apply {
-                    moveTo(0f, h * 0.204f)
-                    lineTo(h * 0.320f, cy)
-                    lineTo(0f, h * 0.796f)
-                    close()
-                }
-                drawPath(trianguloNegro, color = Color.Black)
+            val triAmarillo = Path().apply {
+                moveTo(0f, 0f)
+                lineTo(w, 0f)
+                lineTo(0f, h)
+                close()
             }
+            val triNaranja = Path().apply {
+                moveTo(w, 0f)
+                lineTo(w, h)
+                lineTo(0f, h)
+                close()
+            }
+            drawPath(triAmarillo, color = amarillo)
+            drawPath(triNaranja, color = naranja)
+
+            val cx = w / 2f
+            val cy = h / 2f
+            val sx = w * 0.30f
+            val sy = h * 0.28f
+
+            val cuerpo = Path().apply {
+                moveTo(cx - sx, cy + sy)
+                quadraticTo(cx - sx * 0.8f, cy - sy * 0.2f, cx - sx * 0.35f, cy + sy * 0.1f)
+                quadraticTo(cx, cy + sy * 0.5f, cx + sx * 0.3f, cy - sy * 0.1f)
+                quadraticTo(cx + sx * 0.6f, cy - sy * 0.6f, cx + sx * 0.9f, cy - sy * 0.7f)
+            }
+            drawPath(
+                path = cuerpo,
+                color = Color.White,
+                style = Stroke(width = h * 0.05f, cap = StrokeCap.Round)
+            )
+
+            val cabeza = Offset(cx + sx * 0.95f, cy - sy * 0.75f)
+            drawCircle(color = Color.White, radius = h * 0.05f, center = cabeza)
+
+            val grosorLinea = h * 0.02f
+            drawLine(
+                Color.White,
+                cabeza,
+                Offset(cabeza.x - h * 0.04f, cabeza.y - h * 0.09f),
+                grosorLinea,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                Color.White,
+                cabeza,
+                Offset(cabeza.x + h * 0.03f, cabeza.y - h * 0.09f),
+                grosorLinea,
+                cap = StrokeCap.Round
+            )
+
+            drawLine(
+                Color.White,
+                Offset(cx - sx * 0.2f, cy + sy * 0.2f),
+                Offset(cx - sx * 0.3f, cy + sy * 0.6f),
+                grosorLinea,
+                cap = StrokeCap.Round
+            )
+            drawLine(
+                Color.White,
+                Offset(cx + sx * 0.15f, cy + sy * 0.2f),
+                Offset(cx + sx * 0.2f, cy + sy * 0.6f),
+                grosorLinea,
+                cap = StrokeCap.Round
+            )
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun BanderaSudafricaCLPreview() {
+fun BanderaButanCLPreview() {
     Surface {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            BanderaSudafricaCL(Modifier.fillMaxWidth().aspectRatio(3f / 2f))
+            BanderaButanCL(Modifier.fillMaxWidth().aspectRatio(3f / 2f))
         }
     }
 }
